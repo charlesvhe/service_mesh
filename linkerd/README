@@ -1,0 +1,18 @@
+# 添加配置文件
+kubectl -n linkerd-test create configmap apisix-dashboard-conf.yaml --from-file=./apisix-dashboard-conf.yaml
+
+# 部署
+kubectl -n linkerd-test apply -f apisix.yaml
+kubectl -n linkerd-test delete -f apisix.yaml
+
+# 查看端口映射信息
+kubectl -n linkerd-test get svc
+访问: localhost:30761
+
+# 查看log
+kubectl -n linkerd-test logs -f pod-name -c container-name
+
+# 配置路由
+httpbin.linkerd-test.svc.cluster.local
+
+

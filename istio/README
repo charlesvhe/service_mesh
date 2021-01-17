@@ -1,0 +1,4 @@
+
+JetBrains IDE安装kubernetes插件，Language & Framework -> add CDR(custom resource definition)
+保存https://github.com/istio/api/blob/master/kubernetes/customresourcedefinitions.gen.yaml到本地
+

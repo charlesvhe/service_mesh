@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: apisix
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apisix
+  labels:
+    app: apisix
+    service: apisix
+spec:
+  type: NodePort  #对外暴露调试用
+  ports:
+    - name: apisix-http
+      port: 9080
+      targetPort: 9080
+    - name: apisix-https
+      port: 9443
+      targetPort: 9443
+    - name: apisix-dashboard-http
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: apisix
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apisix
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apisix
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: apisix
+        version: v1
+    spec:
+      serviceAccountName: apisix
+      containers:
+        - image: bitnami/etcd
+          imagePullPolicy: IfNotPresent
+          name: etcd
+          env:
+            - name: "ALLOW_NONE_AUTHENTICATION"
+              value: "yes"
+          ports:
+            - containerPort: 2379
+            - containerPort: 2380
+        - image: apache/apisix
+          imagePullPolicy: IfNotPresent
+          name: apisix
+          ports:
+            - containerPort: 9080
+            - containerPort: 9443
+        - image: apache/apisix-dashboard:2.3
+          imagePullPolicy: IfNotPresent
+          name: apisix-dashboard
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - mountPath: /usr/local/apisix-dashboard/conf/conf.yaml
+              name: apisix-dashboard-conf-yaml
+              subPath: apisix-dashboard-conf.yaml
+      volumes:
+        - name: apisix-dashboard-conf-yaml
+          configMap:
+            name: apisix-dashboard-conf.yaml
+
